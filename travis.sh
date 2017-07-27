@@ -1,9 +1,13 @@
-#git remote add upstream "https://$GH_TOKEN@github.com/rust-lang/rust-by-example.git"
-# git remote add upstream "https://github.com/surabhi226005/express-mongoose-es6-rest-api.git"
-# echo "Remote branch added"
-# git fetch
-# echo "Remote fetched"
-# git branch --track develop origin/develop
-# git branch
-git checkout develop
-git pull
+#!/bin/bash
+if [ "${TRAVIS_PULL_REQUEST}" = "true" ]; then
+	cross-env NODE_ENV=test ./node_modules/.bin/mocha --ui bdd --reporter spec --colors --compilers js:babel-core/register server/tests --recursive 
+  	npm run build 
+	git add dist/
+	git checkout -b release
+	git commit -m "Dist"
+	git push heroku release:master
+fi
+if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then
+	cross-env NODE_ENV=test ./node_modules/.bin/mocha --ui bdd --reporter spec --colors --compilers js:babel-core/register server/tests --recursive
+	npm run build
+fi
